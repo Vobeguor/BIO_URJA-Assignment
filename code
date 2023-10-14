@@ -1,0 +1,89 @@
+import csv
+
+state_forecast = 12000  # total state forecast
+
+region = [2800, 2000, 1500, 6500]  # for all regions
+
+sum_region = sum(region)  # sum of all regions forecast
+diff_region = sum_region - state_forecast  # difference between total region forecast and total state forecast
+
+# manipulate the region's value
+for i in range(4):
+    region[i] = region[i] - (region[i] / sum_region) * diff_region  # for proportionating the region's value according to total region forecast
+
+East, West, North, South = [], [], [],  []  # for regionwise data storing
+
+with open("biourja-efzrr-y7i38ed9-input.csv", "r") as fin:
+    reader = csv.reader(fin)
+    line_no, east, west, north, south = 0, 0, 0, 0, 0  # line_no is for wind farm numbering and east, west, north, south are for regionwise
+
+    for row in reader:
+        temp = row[0]  # for plant name, for example, E1, E2, W1, N1, S1
+
+        if temp[0] == 'E':  # if plant name starts with E, then put the value in East list
+            east += 1
+            East.append(float(row[1]))
+
+        if temp[0] == 'W':
+            west += 1
+            West.append(float(row[1]))
+
+        if temp[0] == 'N':
+            north += 1
+            North.append(float(row[1]))
+
+        if temp[0] == 'S':
+            south += 1
+            South.append(float(row[1]))
+
+        line_no += 1  # increment the line number to get the next entry
+
+# for manipulating the individual regions
+east_sum = sum(East)
+east_diff = east_sum - region[0]
+new_east = 0
+
+for i in range(len(East)):
+    East[i] = East[i] - (East[i] / east_sum) * east_diff
+    new_east += East[i]  # the new total east zone forecast value
+
+west_sum = sum(West)
+west_diff = west_sum - region[1]
+new_west = 0
+
+for i in range(len(West)):
+    West[i] = West[i] - (West[i] / west_sum) * west_diff
+    new_west += West[i]
+
+north_sum = sum(North)
+north_diff = north_sum - region[2]
+new_north = 0
+
+for i in range(len(North)):
+    North[i] = North[i] - (North[i] / north_sum) * north_diff
+    new_north += North[i]
+
+south_sum = sum(South)
+south_diff = south_sum - region[3]
+new_south = 0
+
+for i in range(len(South)):
+    South[i] = South[i] - (South[i] / south_sum) * south_diff
+    new_south += South[i]
+
+with open("output.csv", "w", newline="") as fout:
+    writer = csv.writer(fout)
+    writer.writerow(["Plant_Name", "Forecast"])
+
+    for i, value in enumerate(East, 1):
+        writer.writerow([f"E{i}", value])
+
+    for i, value in enumerate(West, 1):
+        writer.writerow([f"W{i}", value])
+
+    for i, value in enumerate(North, 1):
+        writer.writerow([f"N{i}", value])
+
+    for i, value in enumerate(South, 1):
+        writer.writerow([f"S{i}", value])
+
